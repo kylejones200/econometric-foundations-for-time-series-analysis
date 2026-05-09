@@ -6,6 +6,12 @@ from linearmodels.panel import PanelOLS
 from linearmodels.iv import IV2SLS
 
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 def ols_statsmodels(X: pd.DataFrame, y: pd.Series):
     """Perform Ordinary Least Squares (OLS) regression using statsmodels."""
     X = sm.add_constant(X)  # Add intercept
@@ -55,7 +61,7 @@ if __name__ == "__main__":
     df_ols = pd.DataFrame(
         {"education": [10, 12, 14, 16, 18], "wages": [20, 25, 30, 35, 40]}
     )
-    print(run_ols_regression(df_ols, "wages", ["education"]))
+    logger.info(run_ols_regression(df_ols, "wages", ["education"]))
 
     # Panel Data Example
     df_panel = pd.DataFrame(
@@ -66,7 +72,7 @@ if __name__ == "__main__":
             "education": [10, 11, 12, 13, 9, 10],
         }
     )
-    print(run_panel_regression(df_panel, "income", ["education"]))
+    logger.info(run_panel_regression(df_panel, "income", ["education"]))
 
     # IV Regression Example
     df_iv = pd.DataFrame(
@@ -76,4 +82,4 @@ if __name__ == "__main__":
             "ability": [15, 18, 20, 22, 25],  # Instrumental variable
         }
     )
-    print(run_iv_regression(df_iv, "wages", "education", "ability"))
+    logger.info(run_iv_regression(df_iv, "wages", "education", "ability"))

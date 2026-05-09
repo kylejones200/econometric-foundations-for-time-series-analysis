@@ -7,6 +7,12 @@ Causal inference, policy evaluation, and economic modeling methods.
 import sys
 from pathlib import Path
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -33,8 +39,8 @@ from linearmodels.panel import PanelOLS
 
 def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: int, config: dict):
     """Perform Granger causality test."""
-    print(f"\nGranger Causality Test: Does {x_col} Granger-cause {y_col}?")
-    print("=" * 70)
+    logger.info(f"\nGranger Causality Test: Does {x_col} Granger-cause {y_col}?")
+    logger.info("=" * 70)
     
     test_data = data[[y_col, x_col]].dropna()
     
@@ -46,25 +52,25 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
             if lag in gc_result:
                 p_value = gc_result[lag][0]["ssr_ftest"][1]
                 p_values.append((lag, p_value))
-                print(f"Lag {lag}: p-value = {p_value:.4f}", end="")
+                logger.info(f"Lag {lag}: p-value = {p_value:.4f}", end="")
                 if p_value < 0.05:
-                    print(" → Significant Granger causality")
+                    logger.info(" → Significant Granger causality")
                 else:
-                    print(" → No significant Granger causality")
+                    logger.info(" → No significant Granger causality")
         
         min_p = min(p_values, key=lambda x: x[1])
-        print(f"\nMinimum p-value: {min_p[1]:.4f} at lag {min_p[0]}")
+        logger.info(f"\nMinimum p-value: {min_p[1]:.4f} at lag {min_p[0]}")
         
         return gc_result, min_p
     except Exception as e:
-        print(f"Error in Granger causality test: {e}")
+        logger.error(f"Error in Granger causality test: {e}")
         return None, None
 
 
 def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, cutoff_date: str, config: dict, script_dir: Path):
     """Perform Regression Discontinuity Design (RDD) analysis."""
-    print(f"\nRegression Discontinuity Design Analysis")
-    print("=" * 70)
+    logger.info(f"\nRegression Discontinuity Design Analysis")
+    logger.info("=" * 70)
     
     df = data.copy()
     df = df.reset_index()
@@ -77,10 +83,10 @@ def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, 
     
     model = ols(f"{value_col} ~ time_from_cutoff * treatment", data=df).fit()
     
-    print(model.summary())
+    logger.info(model.summary())
     
     treatment_effect = model.params["treatment"]
-    print(f"\nTreatment Effect: {treatment_effect:.4f}")
+    logger.info(f"\nTreatment Effect: {treatment_effect:.4f}")
     
     # Create visualization
     fig, ax = plt.subplots(figsize=tuple(config.get("plotting", {}).get("figure_size", [12, 6])))
@@ -100,14 +106,14 @@ def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, 
     plt.tight_layout()
     output_dir = ensure_output_dir(get_output_dir(config, script_dir))
     save_plot(fig, output_dir / "rdd_analysis.png", dpi=300)
-    print(f"Plot saved to: {output_dir / 'rdd_analysis.png'}")
+    logger.info(f"Plot saved to: {output_dir / 'rdd_analysis.png'}")
     plt.close(fig)
 
 
 def panel_regression(data: pd.DataFrame, config: dict):
     """Perform panel regression analysis."""
-    print("\nPanel Regression Analysis")
-    print("=" * 70)
+    logger.info("\nPanel Regression Analysis")
+    logger.info("=" * 70)
     
     entity_col = config["model"]["entity_col"]
     time_col = config["model"]["time_col"]
@@ -125,7 +131,7 @@ def panel_regression(data: pd.DataFrame, config: dict):
     )
     
     result = model.fit(cov_type="clustered", cluster_entity=True)
-    print(result.summary)
+    logger.info(result.summary)
 
 
 def main():
@@ -145,8 +151,8 @@ def main():
         df[date_col] = pd.to_datetime(df[date_col])
         df = df.set_index(date_col).sort_index()
     
-    print(f"Loaded {len(df)} data points")
-    print(f"Columns: {list(df.columns)}")
+    logger.info(f"Loaded {len(df)} data points")
+    logger.info(f"Columns: {list(df.columns)}")
     
     # Granger causality test if configured
     if config["model"].get("granger_test", {}).get("enabled", False):
@@ -165,7 +171,7 @@ def main():
     if config["model"].get("panel_regression", {}).get("enabled", False):
         panel_regression(df, config)
     
-    print("\n Econometric analysis complete")
+    logger.info("\n Econometric analysis complete")
 
 
 if __name__ == "__main__":

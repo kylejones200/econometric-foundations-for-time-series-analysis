@@ -67,7 +67,7 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
         return None, None
 
 
-def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, cutoff_date: str, config: dict, script_dir: Path):
+def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, cutoff_date: str, config: dict, script_dir: Path, plot: bool = False):
     """Perform Regression Discontinuity Design (RDD) analysis."""
     logger.info(f"\nRegression Discontinuity Design Analysis")
     logger.info("=" * 70)
@@ -89,25 +89,26 @@ def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, 
     logger.info(f"\nTreatment Effect: {treatment_effect:.4f}")
     
     # Create visualization
-    fig, ax = plt.subplots(figsize=tuple(config.get("plotting", {}).get("figure_size", [12, 6])))
+    if plot:
+        fig, ax = plt.subplots(figsize=tuple(config.get("plotting", {}).get("figure_size", [12, 6])))
     
-    pre_treatment = df[df["treatment"] == 0]
-    post_treatment = df[df["treatment"] == 1]
+        pre_treatment = df[df["treatment"] == 0]
+        post_treatment = df[df["treatment"] == 1]
     
-    ax.scatter(pre_treatment["time_from_cutoff"], pre_treatment[value_col], alpha=0.6, s=20, label="Pre-treatment")
-    ax.scatter(post_treatment["time_from_cutoff"], post_treatment[value_col], alpha=0.6, s=20, label="Post-treatment")
-    ax.axvline(0, color="r", linestyle="--", lw=2, label="Cutoff")
-    ax.set_xlabel("Days from Cutoff")
-    ax.set_ylabel(value_col)
-    ax.set_title(f"Regression Discontinuity Design (Treatment Effect: {treatment_effect:.4f})")
-    ax.legend(loc="best")
-    ax.grid(True, alpha=0.3)
+        ax.scatter(pre_treatment["time_from_cutoff"], pre_treatment[value_col], alpha=0.6, s=20, label="Pre-treatment")
+        ax.scatter(post_treatment["time_from_cutoff"], post_treatment[value_col], alpha=0.6, s=20, label="Post-treatment")
+        ax.axvline(0, color="r", linestyle="--", lw=2, label="Cutoff")
+        ax.set_xlabel("Days from Cutoff")
+        ax.set_ylabel(value_col)
+        ax.set_title(f"Regression Discontinuity Design (Treatment Effect: {treatment_effect:.4f})")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3)
     
-    plt.tight_layout()
-    output_dir = ensure_output_dir(get_output_dir(config, script_dir))
-    save_plot(fig, output_dir / "rdd_analysis.png", dpi=300)
-    logger.info(f"Plot saved to: {output_dir / 'rdd_analysis.png'}")
-    plt.close(fig)
+        plt.tight_layout()
+        output_dir = ensure_output_dir(get_output_dir(config, script_dir))
+        save_plot(fig, output_dir / "rdd_analysis.png", dpi=300)
+        logger.info(f"Plot saved to: {output_dir / 'rdd_analysis.png'}")
+        plt.close(fig)
 
 
 def panel_regression(data: pd.DataFrame, config: dict):

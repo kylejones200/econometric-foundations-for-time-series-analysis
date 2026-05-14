@@ -61,7 +61,7 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
         
         return gc_result, min_p
     except Exception as e:
-        logger.error(f"Error in Granger causality test: {e}")
+        logger.error(f"Error in Granger causality test: {e}", exc_info=True)
         return None, None
 
 

@@ -40,7 +40,6 @@ from linearmodels.panel import PanelOLS
 def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: int, config: dict):
     """Perform Granger causality test."""
     logger.info(f"\nGranger Causality Test: Does {x_col} Granger-cause {y_col}?")
-    logger.info("=" * 70)
     
     test_data = data[[y_col, x_col]].dropna()
     
@@ -70,7 +69,6 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
 def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, cutoff_date: str, config: dict, script_dir: Path, plot: bool = False):
     """Perform Regression Discontinuity Design (RDD) analysis."""
     logger.info(f"\nRegression Discontinuity Design Analysis")
-    logger.info("=" * 70)
     
     df = data.copy()
     df = df.reset_index()
@@ -114,7 +112,6 @@ def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, 
 def panel_regression(data: pd.DataFrame, config: dict):
     """Perform panel regression analysis."""
     logger.info("\nPanel Regression Analysis")
-    logger.info("=" * 70)
     
     entity_col = config["model"]["entity_col"]
     time_col = config["model"]["time_col"]

@@ -44,7 +44,7 @@ def run_panel_regression(df, dependent_var, independent_vars):
     return model.summary
 
 
-def run_iv_regression(df, dependent_var, endogenous_var, instrument, exogenous_vars=[]):
+def run_iv_regression(df, dependent_var, endogenous_var, instrument, exogenous_vars=None):
     """Run Instrumental Variables (2SLS) regression."""
     all_exog = exogenous_vars + [instrument] if exogenous_vars else [instrument]
     X = sm.add_constant(df[all_exog])

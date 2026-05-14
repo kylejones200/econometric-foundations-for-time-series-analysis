@@ -16,7 +16,7 @@ Econometric analysis applies statistical tools in five primary ways:
 
 Econometricians employ a variety of statistical tools to achieve these objectives. The table below summarizes the objectives, tools, and applications relevant to public policy analysis:
 
---------------- ---------------------------------------------- ----------------------------------------------- **Objective** **Econometric Tools** **Policy Applications** Describe Descriptive Statistics, Correlation Analysis Labor Market Trends, Income Distribution Test Hypothesis Tests, ANOVA, Chi-Square Tests Policy Evaluation, Impact Analysis Classify Cluster Analysis, Discriminant Analysis Targeted Welfare Programs, Segmentation Predict Time-Series Models, Regression Analysis Economic Forecasting, Tax Revenue Prediction Explain Structural Equation Modeling, IV Regression Causal Analysis, Policy Mechanism Exploration --------------- ---------------------------------------------- -----------------------------------------------
+--------------- ---------------------------------------------- ----------------------------------------------- Objective Econometric Tools Policy Applications Describe Descriptive Statistics, Correlation Analysis Labor Market Trends, Income Distribution Test Hypothesis Tests, ANOVA, Chi-Square Tests Policy Evaluation, Impact Analysis Classify Cluster Analysis, Discriminant Analysis Targeted Welfare Programs, Segmentation Predict Time-Series Models, Regression Analysis Economic Forecasting, Tax Revenue Prediction Explain Structural Equation Modeling, IV Regression Causal Analysis, Policy Mechanism Exploration --------------- ---------------------------------------------- -----------------------------------------------
 
 # Statistical Inference and Causal Analysis
 

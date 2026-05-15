@@ -4,7 +4,6 @@ Econometric Time Series Analysis
 Causal inference, policy evaluation, and economic modeling methods.
 """
 
-import sys
 from pathlib import Path
 
 import logging
@@ -16,23 +15,18 @@ logger = logging.getLogger(__name__)
 # Add src to path
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 # Import consolidated utilities (signalplot already applied in src/__init__.py)
 from src import (
     load_config,
-    load_time_series,
     ensure_output_dir,
     get_output_dir,
     save_plot,
 )
 
-from statsmodels.tsa.stattools import adfuller, grangercausalitytests
-from statsmodels.tsa.api import VAR
+from statsmodels.tsa.stattools import grangercausalitytests
 from statsmodels.formula.api import ols
-from statsmodels.regression.linear_model import OLS
-import statsmodels.api as sm
 from linearmodels.panel import PanelOLS
 
 
@@ -67,7 +61,7 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
 
 def regression_discontinuity(data: pd.DataFrame, date_col: str, value_col: str, cutoff_date: str, config: dict, script_dir: Path, plot: bool = False):
     """Perform Regression Discontinuity Design (RDD) analysis."""
-    logger.info(f"\nRegression Discontinuity Design Analysis")
+    logger.info("\nRegression Discontinuity Design Analysis")
     
     df = data.copy()
     df = df.reset_index()

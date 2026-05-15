@@ -1,16 +1,17 @@
+import logging
+
 import pandas as pd
 import statsmodels.api as sm
-from sklearn.linear_model import LinearRegression
-from linearmodels.panel import PanelOLS
 from linearmodels.iv import IV2SLS
+from linearmodels.panel import PanelOLS
+from sklearn.linear_model import LinearRegression
 
-
-import logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
 def ols_statsmodels(X: pd.DataFrame, y: pd.Series):
     """Perform Ordinary Least Squares (OLS) regression using statsmodels."""
     X = sm.add_constant(X)  # Add intercept
@@ -43,7 +44,9 @@ def run_panel_regression(df, dependent_var, independent_vars):
     return model.summary
 
 
-def run_iv_regression(df, dependent_var, endogenous_var, instrument, exogenous_vars=None):
+def run_iv_regression(
+    df, dependent_var, endogenous_var, instrument, exogenous_vars=None
+):
     """Run Instrumental Variables (2SLS) regression."""
     all_exog = exogenous_vars + [instrument] if exogenous_vars else [instrument]
     X = sm.add_constant(df[all_exog])

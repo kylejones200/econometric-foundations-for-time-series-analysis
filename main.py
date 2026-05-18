@@ -39,11 +39,12 @@ def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: 
             if lag in gc_result:
                 p_value = gc_result[lag][0]["ssr_ftest"][1]
                 p_values.append((lag, p_value))
-                logger.info(f"Lag {lag}: p-value = {p_value:.4f}", end="")
-                if p_value < 0.05:
-                    logger.info(" → Significant Granger causality")
-                else:
-                    logger.info(" → No significant Granger causality")
+                suffix = (
+                    " → Significant Granger causality"
+                    if p_value < 0.05
+                    else " → No significant Granger causality"
+                )
+                logger.info(f"Lag {lag}: p-value = {p_value:.4f}{suffix}")
 
         min_p = min(p_values, key=lambda x: x[1])
         logger.info(f"\nMinimum p-value: {min_p[1]:.4f} at lag {min_p[0]}")

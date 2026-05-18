@@ -7,38 +7,33 @@ Causal inference, policy evaluation, and economic modeling methods.
 import logging
 from pathlib import Path
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
-# Add src to path
-
 import matplotlib.pyplot as plt
 import pandas as pd
 from linearmodels.panel import PanelOLS
+from statsmodels.formula.api import ols
+from statsmodels.tsa.stattools import grangercausalitytests
 
-# Import consolidated utilities (signalplot already applied in src/__init__.py)
 from src import (
     ensure_output_dir,
     get_output_dir,
     load_config,
     save_plot,
 )
-from statsmodels.formula.api import ols
-from statsmodels.tsa.stattools import grangercausalitytests
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+# Add src to path
 
 
-def granger_causality_test(
-    data: pd.DataFrame, x_col: str, y_col: str, max_lag: int, config: dict
-):
+# Import consolidated utilities (signalplot already applied in src/__init__.py)
+
+
+def granger_causality_test(data: pd.DataFrame, x_col: str, y_col: str, max_lag: int, config: dict):
     """Perform Granger causality test."""
     logger.info(f"\nGranger Causality Test: Does {x_col} Granger-cause {y_col}?")
-
     test_data = data[[y_col, x_col]].dropna()
-
     try:
         gc_result = grangercausalitytests(test_data, maxlag=max_lag, verbose=False)
-
         p_values = []
         for lag in range(1, max_lag + 1):
             if lag in gc_result:
@@ -52,7 +47,6 @@ def granger_causality_test(
 
         min_p = min(p_values, key=lambda x: x[1])
         logger.info(f"\nMinimum p-value: {min_p[1]:.4f} at lag {min_p[0]}")
-
         return gc_result, min_p
     except Exception as e:
         logger.error(f"Error in Granger causality test: {e}", exc_info=True)
@@ -70,32 +64,24 @@ def regression_discontinuity(
 ):
     """Perform Regression Discontinuity Design (RDD) analysis."""
     logger.info("\nRegression Discontinuity Design Analysis")
-
     df = data.copy()
     df = df.reset_index()
     df[date_col] = pd.to_datetime(df[date_col])
     cutoff = pd.to_datetime(cutoff_date)
-
     df["time_from_cutoff"] = (df[date_col] - cutoff).dt.days
     df["treatment"] = (df["time_from_cutoff"] >= 0).astype(int)
     df["interaction"] = df["time_from_cutoff"] * df["treatment"]
-
     model = ols(f"{value_col} ~ time_from_cutoff * treatment", data=df).fit()
-
     logger.info(model.summary())
-
     treatment_effect = model.params["treatment"]
     logger.info(f"\nTreatment Effect: {treatment_effect:.4f}")
-
     # Create visualization
     if plot:
         fig, ax = plt.subplots(
             figsize=tuple(config.get("plotting", {}).get("figure_size", [12, 6]))
         )
-
         pre_treatment = df[df["treatment"] == 0]
         post_treatment = df[df["treatment"] == 1]
-
         ax.scatter(
             pre_treatment["time_from_cutoff"],
             pre_treatment[value_col],
@@ -113,15 +99,13 @@ def regression_discontinuity(
         ax.axvline(0, color="r", linestyle="--", lw=2, label="Cutoff")
         ax.set_xlabel("Days from Cutoff")
         ax.set_ylabel(value_col)
-        ax.set_title(
-            f"Regression Discontinuity Design (Treatment Effect: {treatment_effect:.4f})"
-        )
+        ax.set_title(f"Regression Discontinuity Design (Treatment Effect: {treatment_effect:.4f})")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
-
         plt.tight_layout()
-        output_dir = ensure_output_dir(get_output_dir(config, script_dir))
-        save_plot(fig, output_dir / "rdd_analysis.png", dpi=300)
+        output_dir = ensure_output_dir(config)
+        fig.savefig(output_dir / "rdd_analysis.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
         logger.info(f"Plot saved to: {output_dir / 'rdd_analysis.png'}")
         plt.close(fig)
 
@@ -129,22 +113,18 @@ def regression_discontinuity(
 def panel_regression(data: pd.DataFrame, config: dict):
     """Perform panel regression analysis."""
     logger.info("\nPanel Regression Analysis")
-
     entity_col = config["model"]["entity_col"]
     time_col = config["model"]["time_col"]
     y_col = config["model"]["y_col"]
     x_cols = config["model"]["x_cols"]
-
     data = data.reset_index()
     data = data.set_index([entity_col, time_col])
-
     model = PanelOLS.from_formula(
         f"{y_col} ~ {' + '.join(x_cols)}",
         data=data,
         entity_effects=config["model"].get("entity_effects", True),
         time_effects=config["model"].get("time_effects", True),
     )
-
     result = model.fit(cov_type="clustered", cluster_entity=True)
     logger.info(result.summary)
 
@@ -152,14 +132,11 @@ def panel_regression(data: pd.DataFrame, config: dict):
 def main():
     """Main execution function."""
     script_dir = Path(__file__).parent
-
     # Load configuration using consolidated loader
     config = load_config()
-
     # Load data - Econometrics may require multi-series data
     data_path = script_dir.parent / "data" / config["data"]["input_file"]
     df = pd.read_csv(data_path, encoding="utf-8")
-
     # Process date column
     date_col = config["data"].get("date_col", "date")
     if date_col in df.columns:
@@ -168,7 +145,6 @@ def main():
 
     logger.info(f"Loaded {len(df)} data points")
     logger.info(f"Columns: {list(df.columns)}")
-
     # Granger causality test if configured
     if config["model"].get("granger_test", {}).get("enabled", False):
         x_col = config["model"]["granger_test"]["x_col"]
@@ -180,9 +156,7 @@ def main():
     if config["model"].get("rdd", {}).get("enabled", False):
         value_col = config["model"]["rdd"]["value_col"]
         cutoff_date = config["model"]["rdd"]["cutoff_date"]
-        regression_discontinuity(
-            df, date_col, value_col, cutoff_date, config, script_dir
-        )
+        regression_discontinuity(df, date_col, value_col, cutoff_date, config, script_dir)
 
     # Panel regression if configured
     if config["model"].get("panel_regression", {}).get("enabled", False):

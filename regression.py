@@ -6,9 +6,7 @@ from linearmodels.iv import IV2SLS
 from linearmodels.panel import PanelOLS
 from sklearn.linear_model import LinearRegression
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -44,9 +42,7 @@ def run_panel_regression(df, dependent_var, independent_vars):
     return model.summary
 
 
-def run_iv_regression(
-    df, dependent_var, endogenous_var, instrument, exogenous_vars=None
-):
+def run_iv_regression(df, dependent_var, endogenous_var, instrument, exogenous_vars=None):
     """Run Instrumental Variables (2SLS) regression."""
     all_exog = exogenous_vars + [instrument] if exogenous_vars else [instrument]
     X = sm.add_constant(df[all_exog])
@@ -58,13 +54,9 @@ def run_iv_regression(
 
 if __name__ == "__main__":
     # Example usage
-
     # OLS Example
-    df_ols = pd.DataFrame(
-        {"education": [10, 12, 14, 16, 18], "wages": [20, 25, 30, 35, 40]}
-    )
+    df_ols = pd.DataFrame({"education": [10, 12, 14, 16, 18], "wages": [20, 25, 30, 35, 40]})
     logger.info(run_ols_regression(df_ols, "wages", ["education"]))
-
     # Panel Data Example
     df_panel = pd.DataFrame(
         {
@@ -75,7 +67,6 @@ if __name__ == "__main__":
         }
     )
     logger.info(run_panel_regression(df_panel, "income", ["education"]))
-
     # IV Regression Example
     df_iv = pd.DataFrame(
         {

@@ -23,9 +23,7 @@ data = data.dropna().reset_index()
 
 # Create running variable and treatment indicators
 cutoff_date = pd.to_datetime("2020-03-01")
-data["Months"] = (
-    data["DATE"].dt.to_period("M").astype(int) - cutoff_date.to_period("M").ordinal
-)
+data["Months"] = data["DATE"].dt.to_period("M").astype(int) - cutoff_date.to_period("M").ordinal
 data = data[(data["Months"] >= -30) & (data["Months"] <= 30)].copy()
 data["Treatment"] = (data["Months"] >= 0).astype(int)
 data["Centered_Months"] = data["Months"]
@@ -43,9 +41,7 @@ data["Placebo_Months"] = (
 )
 data["Placebo_Treatment"] = (data["Placebo_Months"] >= 0).astype(int)
 data["Centered_Placebo"] = data["Placebo_Months"]
-placebo_model = smf.ols(
-    "UNRATE ~ Centered_Placebo * Placebo_Treatment", data=data
-).fit()
+placebo_model = smf.ols("UNRATE ~ Centered_Placebo * Placebo_Treatment", data=data).fit()
 
 # Covariate continuity models
 inf_model = smf.ols("Inflation ~ Centered_Months * Treatment", data=data).fit()
@@ -80,9 +76,7 @@ summary_table = pd.DataFrame(
 
 
 # Minimalist RD plot function
-def minimalist_rd_plot(
-    x, y, title, ylabel, filename, ylim_zero=False, plot: bool = False
-):
+def minimalist_rd_plot(x, y, title, ylabel, filename, ylim_zero=False, plot: bool = False):
     lowess_fit = lowess(y, x, frac=0.3)
     lowess_x = lowess_fit[:, 0]
     lowess_y = lowess_fit[:, 1]
@@ -92,7 +86,6 @@ def minimalist_rd_plot(
     interp_std = np.interp(lowess_x, x, rolling_std)
     upper = lowess_y + 1.96 * interp_std
     lower = lowess_y - 1.96 * interp_std
-
     if plot:
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.scatter(x, y, color="black", s=12, alpha=0.5)
@@ -116,7 +109,6 @@ def minimalist_rd_plot(
         plt.show()
 
 
-
 def main():
     # Generate RD plots
     minimalist_rd_plot(
@@ -127,7 +119,6 @@ def main():
         "rd_plot_unrate_minimalist.png",
         ylim_zero=True,
     )
-
     minimalist_rd_plot(
         data["Months"],
         data["Inflation"],
@@ -135,7 +126,6 @@ def main():
         "Inflation Rate (YoY, %)",
         "rd_plot_inflation_minimalist.png",
     )
-
     minimalist_rd_plot(
         data["Months"],
         data["CIVPART"],
@@ -143,7 +133,6 @@ def main():
         "Labor Force Participation Rate (%)",
         "rd_plot_civpart_minimalist.png",
     )
-
     summary_table
 
 
